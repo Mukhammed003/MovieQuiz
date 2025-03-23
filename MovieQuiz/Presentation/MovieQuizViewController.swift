@@ -3,32 +3,12 @@ import UIKit
 final class MovieQuizViewController:
     UIViewController {
     
-    private var currentQuestionIndex: Int = 0
-    
-    private var correctAnswers: Int = 0
-    
-    @IBOutlet private weak var imageViewOfMovie: UIImageView!
-    
-    @IBOutlet private weak var labelOfCounter: UILabel!
-    
-    @IBOutlet private weak var labelOfQuestion: UILabel!
-    
-    @IBAction private func noButtonClicked(_ sender: Any) {
-        let isCorrect = !questions[currentQuestionIndex].correctAnswer
-            showAnswerResult(isCorrect: isCorrect)
-    }
-    
-    @IBAction private func yesButtonClicked(_ sender: Any) {
-        let isCorrect = questions[currentQuestionIndex].correctAnswer
-            showAnswerResult(isCorrect: isCorrect)
-    }
-    
     private struct QuizQuestion {
       let image: String
       let text: String
       let correctAnswer: Bool
     }
-
+    
     private struct QuizStepViewModel {
       let image: UIImage
       let question: String
@@ -41,36 +21,10 @@ final class MovieQuizViewController:
       let buttonText: String
     }
     
-    private func showQuizStepViewModel(quiz step: QuizStepViewModel) {
-      
-        imageViewOfMovie.image = step.image
-        
-        labelOfQuestion.text = step.question
-        
-        labelOfCounter.text = step.questionNumber
-    }
+    private var currentQuestionIndex: Int = 0
     
-    private func showQuizResultsViewModel(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            let firstQuestion = self.questions[self.currentQuestionIndex]
-            let viewModel = self.convertToQuizStepViewModel(model: firstQuestion)
-            self.imageViewOfMovie.layer.borderColor = UIColor.clear.cgColor
-            self.showQuizStepViewModel(quiz: viewModel)
-        }
-        
-        alert.addAction(action)
-        
-        self.present(alert, animated: true, completion: nil)
-    }
-
+    private var correctAnswers: Int = 0
+    
     private let questions: [QuizQuestion] = [
             QuizQuestion(
                 image: "The Godfather",
@@ -113,6 +67,46 @@ final class MovieQuizViewController:
                 text: "Рейтинг этого фильма больше чем 6?",
                 correctAnswer: false)
         ]
+    
+    @IBOutlet private weak var imageViewOfMovie: UIImageView!
+    
+    @IBOutlet private weak var labelOfCounter: UILabel!
+    
+    @IBOutlet private weak var labelOfQuestion: UILabel!
+    
+    @IBOutlet weak var noButton: UIButton!
+    
+    @IBOutlet weak var yesButton: UIButton!
+    
+    private func showQuizStepViewModel(quiz step: QuizStepViewModel) {
+      
+        imageViewOfMovie.image = step.image
+        
+        labelOfQuestion.text = step.question
+        
+        labelOfCounter.text = step.questionNumber
+    }
+    
+    private func showQuizResultsViewModel(quiz result: QuizResultsViewModel) {
+        let alert = UIAlertController(
+            title: result.title,
+            message: result.text,
+            preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            
+            let firstQuestion = self.questions[self.currentQuestionIndex]
+            let viewModel = self.convertToQuizStepViewModel(model: firstQuestion)
+            self.imageViewOfMovie.layer.borderColor = UIColor.clear.cgColor
+            self.showQuizStepViewModel(quiz: viewModel)
+        }
+        
+        alert.addAction(action)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
 
     private func convertToQuizStepViewModel(model: QuizQuestion) -> QuizStepViewModel {
         
@@ -126,12 +120,18 @@ final class MovieQuizViewController:
             correctAnswers += 1 // 2
         }
         
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
+        
         imageViewOfMovie.layer.masksToBounds = true
         imageViewOfMovie.layer.borderWidth = 8
         imageViewOfMovie.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
+            
+            self.yesButton.isEnabled = true
+            self.noButton.isEnabled = true
         }
     }
     
@@ -165,6 +165,16 @@ final class MovieQuizViewController:
         let firstQuizStepViewModel: QuizStepViewModel =  convertToQuizStepViewModel(model: questions[0])
         
         showQuizStepViewModel(quiz: firstQuizStepViewModel)
+    }
+    
+    @IBAction private func noButtonClicked(_ sender: Any) {
+        let isCorrect = !questions[currentQuestionIndex].correctAnswer
+            showAnswerResult(isCorrect: isCorrect)
+    }
+    
+    @IBAction private func yesButtonClicked(_ sender: Any) {
+        let isCorrect = questions[currentQuestionIndex].correctAnswer
+            showAnswerResult(isCorrect: isCorrect)
     }
 }
 
