@@ -74,9 +74,9 @@ final class MovieQuizViewController:
     
     @IBOutlet private weak var labelOfQuestion: UILabel!
     
-    @IBOutlet weak var noButton: UIButton!
+    @IBOutlet private weak var noButton: UIButton!
     
-    @IBOutlet weak var yesButton: UIButton!
+    @IBOutlet private weak var yesButton: UIButton!
     
     private func showQuizStepViewModel(quiz step: QuizStepViewModel) {
       
