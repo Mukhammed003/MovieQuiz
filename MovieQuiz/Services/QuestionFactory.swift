@@ -2,7 +2,7 @@
 import Foundation
 
 
-class QuestionFactory: QuestionFactoryProtocol {
+final class QuestionFactory: QuestionFactoryProtocol {
     
     private let constants = Constants()
     weak var delegate: QuestionFactoryDelegate?
