@@ -5,7 +5,7 @@
 //  Created by Muhammed Nurmukhanov on 30.03.2025.
 //
     
-struct QuizResultsViewModel {
+struct QuizResultsAlertModel {
     let title: String
     let text: String
     let buttonText: String

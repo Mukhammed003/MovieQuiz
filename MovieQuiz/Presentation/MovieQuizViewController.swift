@@ -1,29 +1,20 @@
 import UIKit
 
-final class MovieQuizViewController:
-    UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     private var currentQuestionIndex: Int = 0
-    
     private var correctAnswers: Int = 0
-    
     private let questionsAmount: Int = 10
     
     private var alertPresenter: AlertPresenter?
-    
     private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
-    
     private var currentQuestion: QuizQuestion?
-    
     private var statisticService: StatisticServiceProtocol = StatisticService()
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
-            print("❌ Получен пустой вопрос")
             return
         }
-        
-        print("✅ Получен вопрос: \(question.text)")
 
         currentQuestion = question
         let viewModel = convertToQuizStepViewModel(model: question)
@@ -34,16 +25,12 @@ final class MovieQuizViewController:
     }
     
     @IBOutlet private weak var imageViewOfMovie: UIImageView!
-    
     @IBOutlet private weak var labelOfCounter: UILabel!
-    
     @IBOutlet private weak var labelOfQuestion: UILabel!
-    
     @IBOutlet private weak var noButton: UIButton!
-    
     @IBOutlet private weak var yesButton: UIButton!
     
-    private func showQuizStepViewModel(quiz step: QuizStepViewModel) {
+    private func showQuizStepViewModel(quiz step: QuizStepModel) {
       
         imageViewOfMovie.image = step.image
         
@@ -52,10 +39,10 @@ final class MovieQuizViewController:
         labelOfCounter.text = step.questionNumber
     }
 
-    private func convertToQuizStepViewModel(model: QuizQuestion) -> QuizStepViewModel {
+    private func convertToQuizStepViewModel(model: QuizQuestion) -> QuizStepModel {
         
         var quizStep =
-        QuizStepViewModel(
+        QuizStepModel(
                     image: UIImage(named: model.image) ?? UIImage(),
                     question: model.text,
                     questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
@@ -102,7 +89,7 @@ final class MovieQuizViewController:
                     self.currentQuestionIndex = 0
                     self.correctAnswers = 0
                     self.statisticService.store(gameResult: gameResult)
-                    self.questionFactory.fullquestionArray()
+                    self.questionFactory.resetQuestions()
                     self.questionFactory.requestNextQuestion()
                     self.imageViewOfMovie.layer.borderColor = UIColor.clear.cgColor
                 }
@@ -125,7 +112,7 @@ final class MovieQuizViewController:
         let questionFactory = QuestionFactory()
         self.questionFactory = questionFactory
         questionFactory.setup(delegate: self)
-        questionFactory.fullquestionArray()
+        questionFactory.resetQuestions()
         questionFactory.requestNextQuestion()
         statisticService = StatisticService()
         

@@ -10,5 +10,5 @@ import UIKit
 
 protocol QuestionFactoryProtocol {
     func requestNextQuestion()
-    func fullquestionArray()
+    func resetQuestions()
 }
