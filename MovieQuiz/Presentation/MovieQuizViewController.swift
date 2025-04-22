@@ -7,24 +7,25 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var labelOfQuestion: UILabel!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     private var currentQuestionIndex: Int = 0
     private var correctAnswers: Int = 0
     private let questionsAmount: Int = 10
     
     private var alertPresenter: AlertPresenter?
-    private var questionFactory: QuestionFactoryProtocol = QuestionFactory()
+    private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol = StatisticService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let questionFactory = QuestionFactory()
-        self.questionFactory = questionFactory
-        questionFactory.setup(delegate: self)
-        questionFactory.resetQuestions()
-        questionFactory.requestNextQuestion()
+        imageViewOfMovie.layer.cornerRadius = 20
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        statisticService = StatisticService()
+        showLoadingIndicator()
+        questionFactory?.loadData()
         statisticService = StatisticService()
         alertPresenter = AlertPresenter(viewController: self)
     }
@@ -40,6 +41,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.resetQuestions()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: any Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
     private func showQuizStepViewModel(quiz step: QuizStepModel) {
       
         imageViewOfMovie.image = step.image
@@ -50,10 +61,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     private func convertToQuizStepViewModel(model: QuizQuestion) -> QuizStepModel {
-        
         var quizStep =
         QuizStepModel(
-                    image: UIImage(named: model.image) ?? UIImage(),
+                    image: UIImage(data: model.image) ?? UIImage(),
                     question: model.text,
                     questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         
@@ -99,8 +109,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
                     self.currentQuestionIndex = 0
                     self.correctAnswers = 0
                     self.statisticService.store(gameResult: gameResult)
-                    self.questionFactory.resetQuestions()
-                    self.questionFactory.requestNextQuestion()
+                    self.questionFactory?.resetQuestions()
+                    self.questionFactory?.requestNextQuestion()
                     self.imageViewOfMovie.layer.borderColor = UIColor.clear.cgColor
                 }
             )
@@ -109,9 +119,40 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
         } else {
             currentQuestionIndex += 1
-            questionFactory.requestNextQuestion()
+            questionFactory?.requestNextQuestion()
             imageViewOfMovie.layer.borderColor = UIColor.clear.cgColor
         }
+    }
+    
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+ 
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let alertModel = AlertModel(
+            title: "Ошибка",
+            message: message,
+            buttonText: "Попробовать ещё раз",
+            completion: { [weak self] in
+                guard let self else { return }
+                
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                self.questionFactory?.requestNextQuestion()
+                
+            }
+        )
+
+        alertPresenter?.showQuizResultsViewModel(alert: alertModel)
     }
     
     // MARK: - Lifecycle
