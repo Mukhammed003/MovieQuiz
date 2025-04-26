@@ -10,6 +10,9 @@ final class QuestionFactory: QuestionFactoryProtocol {
     private var movies: [MostPopularMovie] = []
     private var indexesForOneRound: Set<Int> = []
     
+    private let operators: [String] = ["больше", "меньше", "равно"]
+    private let approximateRatings: [Float] = [7, 8, 9]
+    
     init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
@@ -33,6 +36,11 @@ final class QuestionFactory: QuestionFactoryProtocol {
         DispatchQueue.global().async { [weak self] in
                 guard let self = self else { return }
             
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.delegate?.showLoadingIndicator()
+                }
+            
                 guard let index = self.indexesForOneRound.randomElement() else {
                         print("Все вопросы показаны")
                         return
@@ -52,9 +60,30 @@ final class QuestionFactory: QuestionFactoryProtocol {
                }
                 
                 let rating = Float(movie.rating ?? "") ?? 0
-                
-                let text = "Рейтинг этого фильма больше чем 7?"
-                let correctAnswer = rating > 7
+            
+                guard let approxRating = self.approximateRatings.randomElement() else { return }
+                guard let examleOperator = self.operators.randomElement() else { return }
+    
+                var text: String {
+                    if examleOperator == "равно" {
+                        return "Рейтинг этого фильма \(String(describing: examleOperator)) на \(Int(approxRating))?"
+                    }
+                    else {
+                        return "Рейтинг этого фильма \(String(describing: examleOperator)) чем \(Int(approxRating))?"
+                    }
+                }
+            
+               var correctAnswer: Bool {
+                   if examleOperator == "больше" {
+                       return rating > approxRating
+                   }
+                   else if examleOperator == "меньше" {
+                       return rating < approxRating
+                   }
+                   else {
+                       return rating == approxRating
+                   }
+               }
                 
                 let question = QuizQuestion(image: imageData,
                                              text: text,
@@ -63,6 +92,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
                     self.delegate?.didReceiveNextQuestion(question: question)
+                    self.delegate?.hideLoadingIndicator()
                 }
             }
     }
