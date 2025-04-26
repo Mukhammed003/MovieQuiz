@@ -17,17 +17,28 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     private var statisticService: StatisticServiceProtocol = StatisticService()
+    private var networkClient: NetworkRouting = NetworkClient()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         imageViewOfMovie.layer.cornerRadius = 20
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(networkClient: networkClient), delegate: self)
         statisticService = StatisticService()
         showLoadingIndicator()
         questionFactory?.loadData()
         statisticService = StatisticService()
         alertPresenter = AlertPresenter(viewController: self)
+    }
+    
+    func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
     }
     
     func didReceiveNextQuestion(question: QuizQuestion?) {
@@ -61,7 +72,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     private func convertToQuizStepViewModel(model: QuizQuestion) -> QuizStepModel {
-        var quizStep =
+        let quizStep =
         QuizStepModel(
                     image: UIImage(data: model.image) ?? UIImage(),
                     question: model.text,
@@ -122,16 +133,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             questionFactory?.requestNextQuestion()
             imageViewOfMovie.layer.borderColor = UIColor.clear.cgColor
         }
-    }
-    
-    private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
-        activityIndicator.startAnimating()
-    }
-    
-    private func hideLoadingIndicator() {
-        activityIndicator.isHidden = true
-        activityIndicator.stopAnimating()
     }
  
     private func showNetworkError(message: String) {
