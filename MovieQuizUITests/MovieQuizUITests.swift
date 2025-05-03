@@ -22,17 +22,63 @@ class MovieQuizUITests: XCTestCase {
     }
     
     func testYesButton() {
+        sleep(3)
         let firstPoster = app.images["Poster"]
+        let firstPosterData = firstPoster.screenshot().pngRepresentation
         
         app.buttons["Yes"].tap()
         
+        sleep(3)
         let secondPoster = app.images["Poster"]
+        let secondPosterData = secondPoster.screenshot().pngRepresentation
         
-        XCTAssertFalse(firstPoster == secondPoster)
+        XCTAssertNotEqual(firstPosterData, secondPosterData)
     }
     
-    func testExample() {
-        XCTAssertTrue(app.buttons.count > 0)
+    func testLabelCountOfQuestion() {
+        sleep(2)
+        app.buttons["Yes"].tap()
+        
+        sleep(2)
+        let label = app.staticTexts["Index"]
+        
+        let text = label.label
+        
+        XCTAssertEqual(text, "2/10")
+    }
+    
+    func testNoButton() {
+        sleep(3)
+        let firstPoster = app.images["Poster"]
+        let firstPosterData = firstPoster.screenshot().pngRepresentation
+        
+        app.buttons["No"].tap()
+        
+        sleep(3)
+        let secondPoster = app.images["Poster"]
+        let secondPosterData = secondPoster.screenshot().pngRepresentation
+        
+        XCTAssertNotEqual(firstPosterData, secondPosterData)
+    }
+    
+    func testAlertOfEndRound() {
+        
+        for _ in 0..<10 {
+            sleep(2)
+            app.buttons["No"].tap()
+        }
+        
+        sleep(2)
+        let alert = app.alerts["QuizResultsAlert"]
+        
+        XCTAssertTrue(alert.exists)
+        
+        //Этот раунд окончен!    Сыграть ещё раз
+        let alertTitleText = alert.label
+        let alertButtonText = alert.buttons.firstMatch.label
+        
+        XCTAssertEqual(alertTitleText, "Этот раунд окончен!")
+        XCTAssertEqual(alertButtonText, "Сыграть ещё раз")
     }
     
     override func tearDownWithError() throws {
@@ -42,3 +88,4 @@ class MovieQuizUITests: XCTestCase {
         try super.tearDownWithError()
     }
 }
+
