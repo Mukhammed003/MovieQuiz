@@ -81,6 +81,20 @@ class MovieQuizUITests: XCTestCase {
         XCTAssertEqual(alertButtonText, "Сыграть ещё раз")
     }
     
+    func testHidingAlert() {
+        for _ in 0..<10 {
+            sleep(2)
+            app.buttons["Yes"].tap()
+        }
+        
+        sleep(2)
+        let alert = app.alerts["QuizResultsAlert"]
+        
+        app.alerts["QuizResultsAlert"].buttons["Сыграть ещё раз"].tap()
+        
+        XCTAssertFalse(alert.exists)
+    }
+    
     override func tearDownWithError() throws {
         app?.terminate()
         app = nil

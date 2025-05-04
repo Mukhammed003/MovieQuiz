@@ -23,8 +23,8 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     private let questionsAmount = 10
     private var correctAnswers = 0
 
-    init(viewController: MovieQuizViewController) {
-        self.viewController = viewController
+    init(viewController: MovieQuizViewControllerProtocol) {
+        self.viewController = viewController as? MovieQuizViewController
         self.statisticService = StatisticService()
         
         viewController.showLoadingIndicator()
@@ -144,7 +144,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         viewController?.show(quiz: viewModel)
     }
 
-    private func convert(model: QuizQuestion) -> QuizStepModel {
+    func convert(model: QuizQuestion) -> QuizStepModel {
         return QuizStepModel(
             image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
