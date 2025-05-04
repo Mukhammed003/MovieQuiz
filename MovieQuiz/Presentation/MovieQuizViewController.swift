@@ -9,8 +9,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private weak var yesButton: UIButton!
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
-    private var correctAnswers: Int = 0
     private var currentQuestionIndex: Int = 0
+    private var correctAnswers: Int = 0
     private let questionsAmount: Int = 10
     
     private var alertPresenter: AlertPresenter?
@@ -70,16 +70,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         labelOfCounter.text = step.questionNumber
     }
-    
+
     private func convertToQuizStepViewModel(model: QuizQuestion) -> QuizStepModel {
-            let quizStep =
-            QuizStepModel(
-                        image: UIImage(data: model.image) ?? UIImage(),
-                        question: model.text,
-                        questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-            
-            return quizStep
-        }
+        let quizStep =
+        QuizStepModel(
+                    image: UIImage(data: model.image) ?? UIImage(),
+                    question: model.text,
+                    questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+        
+        return quizStep
+    }
     
     private func showAnswerResult(isCorrect: Bool) {
         if isCorrect { // 1
