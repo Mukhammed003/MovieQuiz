@@ -92,7 +92,15 @@ class MovieQuizUITests: XCTestCase {
         
         app.alerts["QuizResultsAlert"].buttons["Сыграть ещё раз"].tap()
         
+        sleep(2)
+        
         XCTAssertFalse(alert.exists)
+        
+        let label = app.staticTexts["Index"]
+        
+        let text = label.label
+        
+        XCTAssertEqual(text, "1/10")
     }
     
     override func tearDownWithError() throws {
