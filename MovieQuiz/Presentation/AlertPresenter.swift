@@ -14,6 +14,8 @@ final class AlertPresenter {
             preferredStyle: .alert
         )
 
+        alert.view.accessibilityIdentifier = "QuizResultsAlert"
+        
         let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
             model.completion()
         }

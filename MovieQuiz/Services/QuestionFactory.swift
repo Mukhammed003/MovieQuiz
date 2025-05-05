@@ -36,11 +36,6 @@ final class QuestionFactory: QuestionFactoryProtocol {
         DispatchQueue.global().async { [weak self] in
                 guard let self = self else { return }
             
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self else { return }
-                    self.delegate?.showLoadingIndicator()
-                }
-            
                 guard let index = self.indexesForOneRound.randomElement() else {
                         print("Все вопросы показаны")
                         return
@@ -56,7 +51,10 @@ final class QuestionFactory: QuestionFactoryProtocol {
                    
                    imageData = try Data(contentsOf: movie.resizedImageURL)
                } catch {
-                   print("Failed to load image")
+                   DispatchQueue.main.async { [weak self] in
+                       guard let self else { return }
+                       self.delegate?.didFailToLoadData(with: error)
+                   }
                }
                 
                 let rating = Float(movie.rating ?? "") ?? 0
@@ -92,20 +90,23 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
                     self.delegate?.didReceiveNextQuestion(question: question)
-                    self.delegate?.hideLoadingIndicator()
                 }
             }
     }
     
     func loadData() {
+        print("Загрузка данных началась...")
         moviesLoader.loadMovies { [weak self] result in
                 DispatchQueue.main.async {
                     guard let self = self else { return }
                     switch result {
                     case .success(let mostPopularMovies):
+                        print("Данные успешно загружены")
                         self.movies = mostPopularMovies.items
+                        self.resetQuestions()
                         self.delegate?.didLoadDataFromServer()
                     case .failure(let error):
+                        print("Ошибка загрузки данных: \(error)")
                         self.delegate?.didFailToLoadData(with: error)
                     }
                 }
